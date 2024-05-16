@@ -8,7 +8,8 @@ exports.addUser = async (req, res) => {
         nameUser: req.body.nameUser,
         email: req.body.email,
         password: bcrypt.hashSync(req.body.password, 10),
-        nationnality: req.body.nationnality
+        nationnality: req.body.nationnality,
+        profileCreated : false,
     }
 
     try {
@@ -22,7 +23,8 @@ exports.addUser = async (req, res) => {
         if (!user) {
             const user = new UserModel(userObj)
             user.save();
-            return res.status(200).json('User added successufuly.');
+            const sessUser = { id: user._id, name: user.nameUser, email: user.email };
+            return res.status(200).json({message:"User added successufuly.",sessUser});
         }
         else {
             return res.status(200).json('The User Name or email is Already Exist  !! ')
@@ -59,17 +61,27 @@ exports.deleteUser = async (req, res) => {
 //Update User
 exports.updateUser = async (req, res) => {
     try {
-        const param = req.params.id;
-        const updatedUser = {
-            "nameUser": req.body.nameUser,
-            "email": req.body.email,
-            "password": bcrypt.hashSync(req.body.password, 10),
-            nationnality: req.body.nationnality
+        const userId = req.params.id;
+        const user = await UserModel.findById(userId).exec()
+        const userUpdated = {
+            email : req.body.email,
+            oldPassword : req.body.oldPassword,
+            newPassword : req.body.newPassword 
         }
-        UserModel.findByIdAndUpdate(param, updatedUser).exec();
-        // const cup = await UserModel.findById(param).exec();
-        return res.status(200).json('User updated successufuly.');
+        const passwordMatch = await bcrypt.compare(userUpdated.oldPassword,user.password) ;
+        if(passwordMatch){
+            const updatedUser = {
+                "email": req.body.email,
+                "password": bcrypt.hashSync(req.body.newPassword, 10),
+            }
+            UserModel.findByIdAndUpdate(userId, updatedUser).exec();
+            return res.status(200).json('User updated successufuly.');
+        }
+        else{
+            return res.status(200).json('The Old Password is incorrect');
+        }
     } catch (error) {
+        console.log({ error: error.message })
         return res.status(400).json({ error: error.message });
     }
 }
@@ -84,6 +96,7 @@ exports.findUserByName = async (req, res) => {
         return res.status(400).json({ error: error.message });
     }
 }
+
 
 // Login function
 exports.loginFunction = async (req, res) => {
@@ -104,35 +117,11 @@ exports.loginFunction = async (req, res) => {
             console.log(sessUser)
             return res.status(200).json({ message:"Welcome To Our App.",sessUser});
         } else {
-            return res.status(200).json('Incorrect password.');
+            return res.status(201).json('Incorrect password.');
         }
     } catch (error) {
         return res.status(400).json({ error: error.message ,auth : false});
     }
 }
-
-// Logout Function
-exports.logoutFunction = async (req, res) => {
-    req.session.destroy(err => {
-        if (err) {
-            console.error('Error destroying session:', err);
-            res.status(500).json({ message: 'Server error' });
-        } else {
-            res.status(200).json({ message: 'Logout successful' });
-        }
-    });
-};
-
-exports.getUserIdSession = async (req,res) => {
-    const userId = req.sessionID
-    // console.log({ userId })
-    if (!req.sessionID) {
-        // console.log({ userId })
-        return res.status(401).json({ message: 'Unauthorized' , auth : false});
-    }
-    console.log({ userId })
-    res.status(200).json({ userId ,auth : true});
-}
-
 
 

@@ -24,8 +24,8 @@ router.get('/User/:id/delete', UserController.deleteUser)
 router.post('/User/:id/update', UserController.updateUser)
 router.get('/User/:nomUser/findUserByName', UserController.findUserByName)
 router.post('/User/login', UserController.loginFunction)
-router.get('/User/logout', UserController.logoutFunction)
-router.get('/User/getUserIdSession', UserController.getUserIdSession)
+
+
 
 // Post Routes
 router.post('/Post/Ajouter', PostController.addPost)
@@ -39,6 +39,12 @@ router.get('/Post/:postId/deleteComment/:commentId', PostController.deleteCommen
 router.post('/Profil/Ajouter', upload.single('pdp'), ProfilController.addProfile)
 router.get('/Profil/Lister', ProfilController.listerProfile)
 router.get('/Profil/:id/delete', ProfilController.deleteProfile)
-router.post('/Profil/:id/update', ProfilController.updateProfile)
+router.post('/Profil/:id/update',upload.single('pdp'), ProfilController.updateProfile)
 router.get('/Profil/:authorId/getProfilByAuthorId', ProfilController.getProfilByAuthorId)
+router.get('/Profil/:profilId/getProfilById', ProfilController.getProfilById)
+router.get('/Profil/:authorId/getProfilesExecProfAuthor', ProfilController.getProfilesExecProfAuthor)
+router.get('/Profil/:authorId/addFollowing/:followingId',ProfilController.addFollowing)
+router.get('/Profil/:authorId/deleteFollowing/:followingId',ProfilController.deleteFollowing)
+router.get('/Profil/:authorId/ifIsFollowing/:followingId',ProfilController.ifIsFollowing)
+
 module.exports = router;

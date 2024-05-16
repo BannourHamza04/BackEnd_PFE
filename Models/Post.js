@@ -1,11 +1,12 @@
-const mongoose = require('mongoose')
-const User = require = ('./User.js')
+const mongoose = require('mongoose');
+const Profile = require('./Profile');
+
 
 const commentaireSchema = new mongoose.Schema({
     content: String,
     author: { 
         type: mongoose.Schema.Types.ObjectId, 
-        ref: User },
+        ref: Profile },
     createdAt: { type: Date, default: Date.now },
 });
 
@@ -20,7 +21,7 @@ const PostSchema = new mongoose.Schema({
     },
     authorPost: { 
         type: mongoose.Schema.Types.ObjectId, 
-        ref: User },
+        ref: Profile },
         
     commentaires : [commentaireSchema],
 

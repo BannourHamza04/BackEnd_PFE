@@ -24,6 +24,14 @@ const ProfileSchema = new mongoose.Schema({
     bio : {
         type : String
     },
+    followers: [{ 
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'User' 
+    }],
+    followings: [{ 
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'User' 
+    }],
     authorProfile: { 
         type: mongoose.Schema.Types.ObjectId, 
         ref: User },
