@@ -46,5 +46,7 @@ router.get('/Profil/:authorId/getProfilesExecProfAuthor', ProfilController.getPr
 router.get('/Profil/:authorId/addFollowing/:followingId',ProfilController.addFollowing)
 router.get('/Profil/:authorId/deleteFollowing/:followingId',ProfilController.deleteFollowing)
 router.get('/Profil/:authorId/ifIsFollowing/:followingId',ProfilController.ifIsFollowing)
+router.get('/Profil/:authorId/getFollowingsByAuthor', ProfilController.getFollowingsByAuthor)
+router.get('/Profil/:authorId/getFollowersByAuthor', ProfilController.getFollowersByAuthor)
 
 module.exports = router;

@@ -227,3 +227,50 @@ exports.getProfilesExecProfAuthor = async (req, res) => {
         return res.status(400).json({ error: error.message });
     }
 }
+
+
+// Lister Followings d'un author
+exports.getFollowingsByAuthor = async (req, res) => {
+    const authorId = req.params.authorId;
+    try {
+        const authorProfil = await ProfileModel.findOne({ authorProfile: authorId }).exec();
+        const followings = authorProfil.followings;
+        const listFollowings = []; 
+
+        if (followings.length > 0) {
+            for (const followingId of followings) {
+                const followingProfil = await ProfileModel.findById(followingId);
+                if (followingProfil) {
+                    listFollowings.push(followingProfil);
+                }
+            }
+            return res.status(200).json({ followings: listFollowings });
+        }
+        return res.status(404).json({ message: "You don't have any Following" });
+    } catch (error) {
+        return res.status(400).json({ error: error.message });
+    }
+}
+
+// Lister Followers d'un author
+exports.getFollowersByAuthor = async (req, res) => {
+    const authorId = req.params.authorId;
+    try {
+        const authorProfil = await ProfileModel.findOne({ authorProfile: authorId }).exec();
+        const followers = authorProfil.followers;
+        const listFollowers = []; 
+
+        if (followers.length > 0) {
+            for (const followerId of followers) {
+                const followerProfil = await ProfileModel.findById(followerId);
+                if (followerProfil) {
+                    listFollowers.push(followerProfil);
+                }
+            }
+            return res.status(200).json({ followers: listFollowers });
+        }
+        return res.status(404).json({ message: "You don't have any Following" });
+    } catch (error) {
+        return res.status(400).json({ error: error.message });
+    }
+}
