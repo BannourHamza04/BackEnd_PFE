@@ -2,12 +2,16 @@ const express = require('express')
 const mongoose = require('mongoose')
 const app = express()
 const port = 4000
+const cookieParser = require('cookie-parser');
+app.use(cookieParser());
+
 app.use(express.json()) //Pour forcer le format de req en json 
 const cors = require('cors');
 app.use(cors({
     credentials: true // enable set cookie
 }))
 app.use('/uploads', express.static('uploads'))
+const jwt = require('jsonwebtoken')
 
 mongoose.connect('mongodb://127.0.0.1:27017/SocialMedia');
 const db  = mongoose.connection;

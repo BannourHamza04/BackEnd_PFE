@@ -1,5 +1,6 @@
 const UserModel = require('../Models/User')
 const bcrypt = require('bcryptjs')
+const jwt = require('jsonwebtoken')
 
 //add User
 exports.addUser = async (req, res) => {
@@ -24,7 +25,8 @@ exports.addUser = async (req, res) => {
             const user = new UserModel(userObj)
             user.save();
             const sessUser = { id: user._id, name: user.nameUser, email: user.email };
-            return res.status(200).json({message:"User added successufuly.",sessUser});
+            const token = jwt.sign({id: user._id}, "hamza")
+            return res.status(200).json({message:"User added successufuly.",sessUser,token});
         }
         else {
             return res.status(200).json('The User Name or email is Already Exist  !! ')
@@ -114,8 +116,9 @@ exports.loginFunction = async (req, res) => {
         const passwordMatch = await bcrypt.compare(userLogin.password, user.password);
         if (passwordMatch) {
             const sessUser = { id: user._id, name: user.nameUser, email: user.email };
+            const token = jwt.sign({id: user._id}, "hamza")
             console.log(sessUser)
-            return res.status(200).json({ message:"Welcome To Our App.",sessUser});
+            return res.status(200).json({ message:"Welcome To Our App.",sessUser,token});
         } else {
             return res.status(201).json('Incorrect password.');
         }
@@ -123,5 +126,3 @@ exports.loginFunction = async (req, res) => {
         return res.status(400).json({ error: error.message ,auth : false});
     }
 }
-
-

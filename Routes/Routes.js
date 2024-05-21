@@ -40,7 +40,7 @@ router.post('/Profil/Ajouter', upload.single('pdp'), ProfilController.addProfile
 router.get('/Profil/Lister', ProfilController.listerProfile)
 router.get('/Profil/:id/delete', ProfilController.deleteProfile)
 router.post('/Profil/:id/update',upload.single('pdp'), ProfilController.updateProfile)
-router.get('/Profil/:authorId/getProfilByAuthorId', ProfilController.getProfilByAuthorId)
+router.get('/Profil/:authorId/getProfilByAuthorId',ProfilController.authMiddleware,ProfilController.getProfilByAuthorId)
 router.get('/Profil/:profilId/getProfilById', ProfilController.getProfilById)
 router.get('/Profil/:authorId/getProfilesExecProfAuthor', ProfilController.getProfilesExecProfAuthor)
 router.get('/Profil/:authorId/addFollowing/:followingId',ProfilController.addFollowing)
