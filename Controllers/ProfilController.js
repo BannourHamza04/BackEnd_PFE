@@ -5,7 +5,6 @@ const jwt = require('jsonwebtoken');
 // Middleware d'authentification
 exports.authMiddleware = (req, res, next) => {
     const token = req.headers.authorization;
-    console.log(token)
     
     if (!token) {
         return res.status(401).json({ message: 'Unauthorized' });
@@ -128,8 +127,6 @@ exports.getProfilById = async (req, res) => {
 exports.addFollowing = async (req, res) => {
     const authorId = req.params.authorId
     const followingId = req.params.followingId
-    console.log(authorId)
-    console.log(followingId)
     try {
         if (authorId != null && followingId != null) {
             const profilUser = await ProfileModel.findOne({ authorProfile: authorId }).exec()
@@ -149,7 +146,7 @@ exports.addFollowing = async (req, res) => {
                 await profilUser.save()
 
                 // Ajouter à la liste des Followers de following
-                profilFollowing.followers.push(authorId)
+                profilFollowing.followers.push(profilUser._id)
                 await profilFollowing.save()
             }
             else {
@@ -184,7 +181,7 @@ exports.deleteFollowing = async (req, res) => {
                 await profilUser.save();
 
                 // Supprimer de la liste des Followers du following
-                const authorIndex = profilFollowing.followers.indexOf(authorId);
+                const authorIndex = profilFollowing.followers.indexOf(profilUser._id);
                 profilFollowing.followers.splice(authorIndex, 1);
                 await profilFollowing.save();
 

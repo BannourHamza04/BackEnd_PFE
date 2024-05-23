@@ -24,8 +24,8 @@ router.get('/User/:id/delete', UserController.deleteUser)
 router.post('/User/:id/update', UserController.updateUser)
 router.get('/User/:nomUser/findUserByName', UserController.findUserByName)
 router.post('/User/login', UserController.loginFunction)
-
-
+router.post('/User/forgetPassword',UserController.forgetPassword)
+router.post('/User/reset-password',UserController.resetPassword)
 
 // Post Routes
 router.post('/Post/Ajouter', PostController.addPost)
