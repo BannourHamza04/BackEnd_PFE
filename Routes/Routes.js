@@ -3,6 +3,7 @@ const router = express.Router();
 const UserController = require('../Controllers/UserController')
 const PostController = require('../Controllers/PostController')
 const ProfilController = require('../Controllers/ProfilController')
+const AdminController = require('../Controllers/AdminController')
 const multer = require('multer');
 
 // Multer Disk Storage
@@ -16,6 +17,14 @@ const storage = multer.diskStorage({
     }
 })
 const upload = multer({ storage: storage })
+
+
+
+// Admin Routes
+router.post('/Admin/loginAdmin', AdminController.loginAdminFunction)
+router.post('/Admin/addAdmin', AdminController.addAdmin)
+router.get('/Admin/getStats',AdminController.authMiddleware,AdminController.getStats)
+
 
 // User Routes
 router.post('/User/Ajouter', UserController.addUser)

@@ -130,7 +130,7 @@ exports.loginFunction = async (req, res) => {
 }
 
 // Forget Password
-exports.forgetPassword = async (req,res) => {
+exports.forgetPassword = async (req, res) => {
     const email = req.body.email
     try {
         const user = await UserModel.findOne({ email });
@@ -142,16 +142,19 @@ exports.forgetPassword = async (req,res) => {
         user.resetPasswordExpires = Date.now() + 360000; // 10min
         await user.save();
 
-        const transporter = nodemailer.createTransport({
-            service: 'Gmail',
+        var transporter = nodemailer.createTransport({
+            host: 'smtp-relay.brevo.com',
+            port: 587,
+            secure: false, // true pour le port 465, false pour les autres ports
             auth: {
-                user: 'miftahlkhir.enfance@gmail.com',
-                pass: 'Bn$442001',
-            },
+                user: '757525001@smtp-brevo.com',
+                pass: 'v2VhBTPjUxaYNX5I'
+            }
         });
+
         const mailOptions = {
             to: user.email,
-            from: 'passwordreset@SportApp.com',
+            from: '757525001@smtp-brevo.com',
             subject: 'Password Reset',
             text: `You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\n` +
                 `Please use the following token to reset your password:\n\n` +
@@ -165,12 +168,13 @@ exports.forgetPassword = async (req,res) => {
             res.status(200).send('An email has been sent to ' + user.email + ' with further instructions.');
         });
     } catch (err) {
+        console.log(err)
         res.status(500).send('Error requesting password reset');
     }
 }
 
 // Changement de Mot de pass
-exports.resetPassword = async (req,res) => {
+exports.resetPassword = async (req, res) => {
     const { token, newPassword } = req.body;
     try {
         const user = await UserModel.findOne({
@@ -182,7 +186,7 @@ exports.resetPassword = async (req,res) => {
             return res.status(201).send('Password reset token is invalid or has expired.');
         }
 
-        user.password = bcrypt.hashSync(req.body.newPassword,10); 
+        user.password = bcrypt.hashSync(req.body.newPassword, 10);
         user.resetPasswordToken = undefined;
         user.resetPasswordExpires = undefined;
         await user.save();
@@ -192,3 +196,4 @@ exports.resetPassword = async (req,res) => {
         res.status(500).send('Error resetting password');
     }
 }
+
