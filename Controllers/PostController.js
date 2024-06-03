@@ -1,19 +1,19 @@
 const PostModel = require('../Models/Post')
+const ProfileModel = require('../Models/Profile')
 const UserModel = require('../Models/User')
 const bcrypt = require('bcryptjs')
 
 //add Post
 exports.addPost = async (req,res) =>{
     const postObj = {
-        image : req.body.image,
+        image : req.file.path,
         content : req.body.content,
         
     }
-    if (req.body.authorPost) {
-        postObj.authorPost = req.body.authorPost;
+    if (req.params.idAuthor) {
+        const authorProfil = await ProfileModel.findOne({ authorProfile: req.params.idAuthor }).exec();
+        postObj.authorPost = authorProfil._id;
     }
-    // const user = await UserModel.findById(postObj.authorPost)
-    // console.log(user)
 
     try {
         const post = new PostModel(postObj)
@@ -27,8 +27,21 @@ exports.addPost = async (req,res) =>{
 
 // Liste Post
 exports.listerPost = async (req, res) => {
+    const authorId = req.params.authorId;
+
     try {
-        const postList = await PostModel.find({}).exec();
+        const authorProfil = await ProfileModel.findOne({ authorProfile: authorId }).exec();
+        if (!authorProfil) {
+            return res.status(404).json({ error: "Author profile not found" });
+        }
+        const followings = authorProfil.followings;
+        const authorAndFollowings = [...followings, authorProfil._id];
+
+        const postList = await PostModel.find({ authorPost: { $in: authorAndFollowings } })
+        .sort({ createdAt: -1 })
+        .populate('authorPost', 'nameInProfile pdp')
+        .exec();
+
         return res.status(200).json({ postList });
     } catch (error) {
         return res.status(400).json({ error: error.message });

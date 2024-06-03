@@ -18,8 +18,6 @@ const storage = multer.diskStorage({
 })
 const upload = multer({ storage: storage })
 
-
-
 // Admin Routes
 router.post('/Admin/loginAdmin', AdminController.loginAdminFunction)
 router.post('/Admin/addAdmin', AdminController.addAdmin)
@@ -37,8 +35,8 @@ router.post('/User/forgetPassword',UserController.forgetPassword)
 router.post('/User/reset-password',UserController.resetPassword)
 
 // Post Routes
-router.post('/Post/Ajouter', PostController.addPost)
-router.get('/Post/Lister', PostController.listerPost)
+router.post('/Post/:idAuthor/Ajouter',upload.single('image'), PostController.addPost)
+router.get('/Post/:authorId/Lister', PostController.listerPost)
 router.get('/Post/:id/delete', PostController.deletePost)
 router.post('/Post/:id/update', PostController.updatePost)
 router.post('/Post/:postId/addComment', PostController.addCommentToPost)
