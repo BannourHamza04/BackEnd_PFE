@@ -1,5 +1,6 @@
 const AdminModel = require('../Models/Admin')
 const UserModel = require('../Models/User')
+const PostModel = require('../Models/Post')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 
@@ -79,18 +80,44 @@ exports.addAdmin = async (req, res) => {
 }
 
 // get Statistiques
-exports.getStats = async (req, res) => {
+exports.getStats = (io, connectedUsers) => async (req, res) => {
     try {
         const stats = {}
+        // const countUsers = await UserModel.countDocuments().exec();
 
-        const countUsers = await UserModel.countDocuments().exec();
+        const postId = '6627c78711a4c8de2e7ff705'
 
-        
-        if (countUsers > 0) {
-            stats.countUsers = countUsers
+        const post = await PostModel.findById(postId).exec();
+        const countComments = post.commentaires.length
+        if (countComments > 0) {
+            stats.countComments = countComments
             return res.status(200).json({ stats });
         }
-        return res.status(404).json({ message: "None User Founded."});
+        return res.status(404).json({ message: "None Stats Founded."});
+    } catch (error) {
+        return res.status(400).json({ error: error.message });
+    }
+}
+
+//Add Comment into Post 
+exports.addCommentToPost = (io, connectedUsers) => async (req, res) => {
+    try {
+        const postId = req.params.postId; 
+        const newComment = {
+            content: req.body.content,
+            author: req.body.authorComment 
+        };
+
+        const post = await PostModel.findById(postId);
+
+        if (!post) {
+            return res.status(404).json({ error: "Post not found." });
+        }
+        post.commentaires.push(newComment);
+        await post.save();
+        const i = 1
+        io.emit('postAdded',i)
+        return res.status(200).json({ message: "Comment added successfully." });
     } catch (error) {
         return res.status(400).json({ error: error.message });
     }

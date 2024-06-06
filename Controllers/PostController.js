@@ -39,7 +39,7 @@ exports.listerPost = async (req, res) => {
 
         const postList = await PostModel.find({ authorPost: { $in: authorAndFollowings } })
         .sort({ createdAt: -1 })
-        .populate('authorPost', 'nameInProfile pdp')
+        .populate('authorPost', ' _id nameInProfile pdp').populate('commentaires.author','_id nameInProfile pdp')
         .exec();
 
         return res.status(200).json({ postList });
@@ -80,9 +80,13 @@ exports.updatePost =  async (req,res) =>{
 exports.addCommentToPost = async (req, res) => {
     try {
         const postId = req.params.postId; 
+        const authorProfil = await ProfileModel.findOne({ authorProfile: req.body.authorComment }).exec();
+        if(!authorProfil){
+            return res.status(404).json({ error: "author not found." });
+        }
         const newComment = {
             content: req.body.content,
-            author: req.body.authorComment 
+            author: authorProfil 
         };
 
         const post = await PostModel.findById(postId);
@@ -91,7 +95,6 @@ exports.addCommentToPost = async (req, res) => {
             return res.status(404).json({ error: "Post not found." });
         }
         post.commentaires.push(newComment);
-
         await post.save();
 
         return res.status(200).json({ message: "Comment added successfully." });
@@ -126,3 +129,121 @@ exports.deleteCommentFromPost = async (req, res) => {
         return res.status(400).json({ error: error.message });
     }
 }
+
+//Afficher Commentaires d'un Post
+exports.listCommentsPost = async (req, res) => {
+    try {
+        const postId = req.params.postId; 
+        const post = await PostModel.findById(postId).populate('commentaires.author','nameInProfile pdp');
+
+        if (!post) {
+            return res.status(404).json({ error: "Post not found." });
+        }
+
+        const commentaires = post.commentaires
+
+        return res.status(200).json({ commentaires });
+    } catch (error) {
+        return res.status(400).json({ error: error.message });
+    }
+}
+
+
+// Verifier si l'user a deja liké un post ou non
+exports.ifIsLikePost = async (req, res) => {
+    const postId = req.params.postId;
+    const likerId = req.params.likerId;
+    try {
+        if (postId != null && likerId != null) {
+            const liker = await ProfileModel.findOne({ authorProfile: likerId }).exec()
+            const post = await PostModel.findById(postId)
+            if (!liker) {
+                console.log("Liker: " + liker)
+                return res.status(404).json({ error: "User not found." });
+            }
+            if (!post) {
+                console.log("Post: " + post)
+                return res.status(404).json({ error: "Post not found." });
+            }
+            const isLiker = post.likes.some(likes => likes.author.toString() === liker._id.toString());
+            if (isLiker) {
+                return res.status(200).json(true);
+            } else {
+                return res.status(201).json(false);
+            }
+        } else {
+            return res.status(400).json('Missing postId or likerId');
+        }
+    } catch (error) {
+        return res.status(500).json({ error: error.message });
+    }
+};
+
+// Like and Dislike
+exports.likeAndDisLike = async (req, res) => {
+    const postId = req.params.postId;
+    const likerId = req.params.likerId;
+    try {
+        if (postId != null && likerId != null) {
+            const liker = await ProfileModel.findOne({ authorProfile: likerId }).exec()
+            const post = await PostModel.findById(postId);
+
+            if (!liker) {
+                return res.status(404).json({ error: "Liker not found." });
+            }
+            if (!post) {
+                return res.status(404).json({ error: "Post not found." });
+            }
+
+            const isLiker = post.likes.some(likes => likes.author.toString() === liker._id.toString());
+
+            if (!isLiker) {
+                post.likes.push({ author: liker._id });
+                post.nombreLikes = post.likes.length
+                await post.save();
+                return res.status(200).json('Like successful');
+            } else {
+                post.likes = post.likes.filter(likes => likes.author.toString() !== liker._id.toString());
+                post.nombreLikes = post.likes.length
+                await post.save();
+                return res.status(200).json('Dislike successful');
+            }
+        }
+    } catch (error) {
+        return res.status(400).json({ error: error.message });
+    }
+};
+
+
+// isAuthor Post
+exports.isAuthorPost = async (req, res) => {
+    const postId = req.params.postId;
+    const authorId = req.params.authorId;
+    console.log("1")
+    try {
+        console.log("2")
+        if (postId != null && authorId != null) {
+            console.log("3")
+            const author = await ProfileModel.findOne({ authorProfile: authorId }).exec()
+            const post = await PostModel.findById(postId);
+            console.log("4")
+            if (!author) {
+                return res.status(404).json({ error: "Liker not found." });
+            }
+            if (!post) {
+                return res.status(404).json({ error: "Post not found." });
+            }
+            console.log("5")
+            const isAuthor = post.authorPost.toString() === author._id.toString();
+            if ( isAuthor ) {
+                console.log("6")
+                return res.status(200).json(true);
+            } else {
+                console.log("7")
+                return res.status(200).json(false);
+            }
+        }
+    } catch (error) {
+        return res.status(400).json({ error: error.message });
+    }
+};

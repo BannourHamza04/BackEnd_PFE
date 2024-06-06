@@ -10,6 +10,14 @@ const commentaireSchema = new mongoose.Schema({
     createdAt: { type: Date, default: Date.now },
 });
 
+const likeSchema = new mongoose.Schema({
+    author: { 
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: Profile },
+    createdAt: { type: Date, default: Date.now },
+});
+
+
 const PostSchema = new mongoose.Schema({
     image : {
         type : String,
@@ -24,6 +32,10 @@ const PostSchema = new mongoose.Schema({
         ref: Profile },
         
     commentaires : [commentaireSchema],
+    likes : [likeSchema],
+    nombreLikes: {
+        type  : Number,
+    }
 
 },{timestamps : true})
 

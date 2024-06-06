@@ -176,6 +176,7 @@ exports.forgetPassword = async (req, res) => {
 // Changement de Mot de pass
 exports.resetPassword = async (req, res) => {
     const { token, newPassword } = req.body;
+    console.log(token)
     try {
         const user = await UserModel.findOne({
             resetPasswordToken: token,
