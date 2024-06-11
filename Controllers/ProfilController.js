@@ -5,7 +5,6 @@ const jwt = require('jsonwebtoken');
 // Middleware d'authentification
 exports.authMiddleware = (req, res, next) => {
     const token = req.headers.authorization;
-    
     if (!token) {
         return res.status(401).json({ message: 'Unauthorized' });
     }
@@ -17,6 +16,7 @@ exports.authMiddleware = (req, res, next) => {
         return res.status(401).json({ message: 'Token invalid' });
     }
 };
+
 
 //add Profile
 exports.addProfile = async (req, res) => {
@@ -100,6 +100,9 @@ exports.getProfilByAuthorId = async (req, res) => {
             return res.status(401).json("The Profile or the User doesent exist !!");
         }
         else {
+            profil.nombreFollowers = profil.followers.length
+            profil.nombreFollowings = profil.followings.length
+            await profil.save()
             return res.status(200).json({ profil });
         }
     } catch (error) {
@@ -116,6 +119,9 @@ exports.getProfilById = async (req, res) => {
             return res.status(401).json("The Profile or the User doesent exist !!");
         }
         else {
+            profil.nombreFollowers = profil.followers.length
+            profil.nombreFollowings = profil.followings.length
+            await profil.save()
             return res.status(200).json({ profil });
         }
     } catch (error) {

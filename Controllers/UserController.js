@@ -4,6 +4,9 @@ const jwt = require('jsonwebtoken')
 const nodemailer = require('nodemailer')
 const crypto = require('crypto');
 
+
+
+
 //add User
 exports.addUser = async (req, res) => {
     console.log(req.body)

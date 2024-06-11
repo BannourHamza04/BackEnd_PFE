@@ -48,10 +48,21 @@ exports.listerPost = async (req, res) => {
     }
 }
 
-//Supprimer Post 
+// Trouver LE POST  par Id
+exports.findPostById = async (req, res) => {
+    const postId = req.params.postId;
+    try {
+        const post = await PostModel.findById(postId).exec()
+        return res.status(200).json({ post });
+    } catch (error) {
+        return res.status(400).json({ error: error.message });
+    }
+}
+
+//Delete Post 
 exports.deletePost = async (req,res) => {
     try {
-        const param = req.params.id;
+        const param = req.params.postId;
         PostModel.findByIdAndDelete(param).exec();
         return res.status(200).json('Post deleted successufuly.');
     } catch (error) {
@@ -62,19 +73,17 @@ exports.deletePost = async (req,res) => {
 //Update Post
 exports.updatePost =  async (req,res) =>{
     try{
-        const param = req.params.id;
-        const updatedPostObj = {
-            "image" : req.body.image,
-            "content" : req.body.content,
-            "authorPost" : req.body.authorPost
-        }
-        PostModel.findByIdAndUpdate(param,updatedPostObj).exec();
-        // const cup = await PostModel.findById(param).exec();
-        return res.status(200).json('Post updated successufuly.');
+        const postId = req.params.postId
+        const content = req.body.content
+        const post = await PostModel.findById(postId);
+        post.content = content
+        await post.save()
+        return res.status(200).json('Post Updated Successfully');
     }catch(error){
         return res.status(400).json({ error: error.message });
     }
 }
+
 
 //Add Comment into Post 
 exports.addCommentToPost = async (req, res) => {
@@ -219,27 +228,20 @@ exports.likeAndDisLike = async (req, res) => {
 exports.isAuthorPost = async (req, res) => {
     const postId = req.params.postId;
     const authorId = req.params.authorId;
-    console.log("1")
     try {
-        console.log("2")
         if (postId != null && authorId != null) {
-            console.log("3")
             const author = await ProfileModel.findOne({ authorProfile: authorId }).exec()
             const post = await PostModel.findById(postId);
-            console.log("4")
             if (!author) {
                 return res.status(404).json({ error: "Liker not found." });
             }
             if (!post) {
                 return res.status(404).json({ error: "Post not found." });
             }
-            console.log("5")
             const isAuthor = post.authorPost.toString() === author._id.toString();
             if ( isAuthor ) {
-                console.log("6")
                 return res.status(200).json(true);
             } else {
-                console.log("7")
                 return res.status(200).json(false);
             }
         }
@@ -247,3 +249,49 @@ exports.isAuthorPost = async (req, res) => {
         return res.status(400).json({ error: error.message });
     }
 };
+
+
+// Liste Post By Author
+exports.listerPostsByAuthor = async (req, res) => {
+    const authorId = req.params.authorId;
+
+    try {
+        const authorProfil = await ProfileModel.findOne({ authorProfile: authorId }).exec();
+        if (!authorProfil) {
+            return res.status(404).json({ error: "Author profile not found" });
+        }
+
+        const postList = await PostModel.find({ authorPost:  authorProfil})
+        .sort({ createdAt: -1 })
+        .populate('authorPost', ' _id nameInProfile pdp').populate('commentaires.author','_id nameInProfile pdp')
+        .exec();
+        authorProfil.nombrePostes = postList.length
+        await authorProfil.save()
+        return res.status(200).json({ postList });
+    } catch (error) {
+        return res.status(400).json({ error: error.message });
+    }
+}
+
+
+// Liste Post By User
+exports.listerPostsByUser = async (req, res) => {
+    const authorId = req.params.authorId;
+
+    try {
+        const authorProfil = await ProfileModel.findById(authorId).exec();
+        if (!authorProfil) {
+            return res.status(404).json({ error: "Author profile not found" });
+        }
+
+        const postList = await PostModel.find({ authorPost:  authorProfil})
+        .sort({ createdAt: -1 })
+        .populate('authorPost', ' _id nameInProfile pdp').populate('commentaires.author','_id nameInProfile pdp')
+        .exec();
+        authorProfil.nombrePostes = postList.length
+        await authorProfil.save()
+        return res.status(200).json({ postList });
+    } catch (error) {
+        return res.status(400).json({ error: error.message });
+    }
+}
