@@ -104,6 +104,7 @@ exports.addCommentToPost = async (req, res) => {
             return res.status(404).json({ error: "Post not found." });
         }
         post.commentaires.push(newComment);
+        post.nombreComments = post.commentaires.length
         await post.save();
 
         return res.status(200).json({ message: "Comment added successfully." });

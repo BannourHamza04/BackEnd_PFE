@@ -35,6 +35,9 @@ const PostSchema = new mongoose.Schema({
     likes : [likeSchema],
     nombreLikes: {
         type  : Number,
+    },
+    nombreComments: {
+        type  : Number,
     }
 
 },{timestamps : true})

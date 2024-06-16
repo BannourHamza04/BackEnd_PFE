@@ -17,7 +17,6 @@ exports.authMiddleware = (req, res, next) => {
     }
 };
 
-
 //add Profile
 exports.addProfile = async (req, res) => {
     const profileObj = {

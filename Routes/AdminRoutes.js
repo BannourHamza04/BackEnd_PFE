@@ -1,13 +1,10 @@
 const express = require('express');
 const AdminController = require('../Controllers/AdminController');
+const router = express.Router();
 
-module.exports = (io, connectedUsers) => {
-    const router = express.Router();
+router.post('/loginAdmin', AdminController.loginAdminFunction);
+router.post('/addAdmin', AdminController.addAdmin);
+router.post('/:postId/addCommentToPost', AdminController.addCommentToPost);
+router.get('/getStats', AdminController.getStats);
 
-    router.post('/loginAdmin', AdminController.loginAdminFunction);
-    router.post('/addAdmin', AdminController.addAdmin);
-    router.post('/:postId/addCommentToPost', AdminController.addCommentToPost(io, connectedUsers));
-    router.get('/getStats', AdminController.authMiddleware, AdminController.getStats(io, connectedUsers));
-
-    return router;
-};
+module.exports = router;
